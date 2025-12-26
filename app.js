@@ -10,23 +10,32 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-mongoose.connect('mongodb://localhost:27017/mini');
+// ✅ MongoDB (Atlas required on Vercel)
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB error:', err));
 
+// View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Middleware
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Routes
 app.use('/chief', chiefRoutes);
 app.use('/warden', wardenRoutes);
 
+// Default route
 app.get('/', (req, res) => {
   res.redirect('/chief/dashboard');
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// ❌ DO NOT listen on Vercel
+// app.listen(PORT)
 
+// ✅ REQUIRED for Vercel
+export default app;
